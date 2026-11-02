@@ -1,20 +1,33 @@
 [project]
 name = "deal-doc-assistant"
 version = "0.1.0"
-description = "Add your description here"
+description = "M&A RAG document project"
 readme = "README.md"
 authors = [
     { name = "OmarGit99", email = "omarshaikh@outlook.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "httpx>=0.28.1",
+    "pydantic>=2.14.2",
+]
 
-[project.scripts]
-deal-doc-assistant = "deal_doc_assistant:main"
+[tool.ruff]
+line-length = 100
+target-version = "py312"
 
-[build-system]
-requires = ["uv_build>=0.13.6,<0.14.0"]
-build-backend = "uv_build"
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
 
 [dependency-groups]
 dev = [
