@@ -4,8 +4,15 @@ uv run python -m scripts.search "What is the termination fee?" --deal juniper-hp
 """
 
 import argparse
+import asyncio
 import io
 import sys
+
+# Fix Psycopg async compatibility on Windows
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(
+        asyncio.WindowsSelectorEventLoopPolicy()
+    )
 
 from langchain_postgres import PGEngine
 

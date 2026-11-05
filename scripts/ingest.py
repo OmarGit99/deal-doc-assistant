@@ -9,10 +9,17 @@ chunker no longer produces are deleted.
 """
 
 import argparse
+import asyncio
 import io
 import json
 import sys
 from pathlib import Path
+
+# Fix Psycopg async compatibility on Windows
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(
+        asyncio.WindowsSelectorEventLoopPolicy()
+    )
 
 from langchain_postgres import PGEngine
 
