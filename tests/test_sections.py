@@ -334,3 +334,16 @@ def test_scanned_filing_is_flagged() -> None:
     page = "AGREEMENT AND PLAN OF MERGER " + "word " * 1000
     parsed = parse_structure([page] * 100)
     assert any("scanned" in w for w in parsed.warnings)
+
+
+def test_without_signature_marker_body_ends_at_first_annex() -> None:
+    markup = SECTION_TOP_LEVEL.replace(
+        "<p>IN WITNESS WHEREOF, the parties have caused this Agreement to be executed.</p>",
+        "<p>SYNOPSYS, INC.</p><p>EXHIBIT A</p><p>CERTAIN DEFINITIONS</p>"
+        "<p>\u201cAffiliate\u201d means any controlled Person.</p>",
+    )
+    parsed = parse(markup)
+    annexes = {s.number: s for s in parsed.sections if s.article_number == 0}
+    assert set(annexes) == {"Exhibit A"}
+    assert [d.section_number for d in parsed.definitions] == ["Exhibit A"]
+    assert "CERTAIN DEFINITIONS" not in parsed.sections[-2].text

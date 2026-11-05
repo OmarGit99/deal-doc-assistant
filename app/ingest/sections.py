@@ -38,6 +38,7 @@ class Definition:
     term: str
     text: str
     section_number: str
+    inline: bool = False  # True when defined inside a paragraph rather than as a list entry
 
 
 @dataclass
@@ -252,7 +253,7 @@ def _definitions(section: Section) -> list[Definition]:
             tail = line[inline.start() :]
             stop = _SENTENCE_END.search(tail)
             text = tail[: stop.start() + 1] if stop else tail
-            found.append(Definition(inline["term"].strip(), text[:2000], section.number))
+            found.append(Definition(inline["term"].strip(), text[:2000], section.number, True))
     return found
 
 
@@ -340,18 +341,33 @@ def _annexes(tail: list[str]) -> tuple[list[Section], list[str], int]:
     return kept, dropped, dropped_chars
 
 
+def _first_annex_heading(lines: list[str], start: int, end: int) -> int | None:
+    """Fallback end of the body: the first short 'Exhibit A' style heading in the second
+    half of the document. Earlier ones are contents-page entries or cross-references."""
+    halfway = start + (end - start) // 2
+    for i in range(halfway, end):
+        if len(lines[i]) < 60 and ANNEX_RE.match(lines[i]):
+            return i
+    return None
+
+
 # --- the parser --------------------------------------------------------------------------
 
 
 def parse_structure(lines: list[str], deal_id: str = "") -> ParsedAgreement:
     start, method = find_body_start(lines)
     end, end_found = find_body_end(lines, start)
-    body = lines[start:end]
     warnings: list[str] = []
     if method != "preamble":
         warnings.append(f"body start found by '{method}' rule, not the preamble")
     if not end_found:
-        warnings.append("no end marker; signature pages may be in the last section")
+        annex_start = _first_annex_heading(lines, start, end)
+        if annex_start is not None:
+            end = annex_start
+            warnings.append("no signature marker; body ends at the first annex heading")
+        else:
+            warnings.append("no end marker; signature pages may be in the last section")
+    body = lines[start:end]
 
     if len(lines) < 300 and sum(map(len, lines)) / max(len(lines), 1) > 1_000:
         warnings.append(
