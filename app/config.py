@@ -21,6 +21,23 @@ class Settings(BaseSettings):
     embedding_price_per_million_tokens: float = 0.02  # USD, for cost estimates only
     openai_api_key: SecretStr | None = None
 
+    # Chat models. The answer model also does extraction; the router model is for Week 4.
+    answer_model: str = "gpt-5.4-mini"
+    router_model: str = "gpt-5.4-nano"
+    reasoning_effort: Literal["none", "low", "medium", "high"] = "low"
+    answer_max_tokens: int = 4000  # includes reasoning tokens, so leave headroom
+    llm_timeout_seconds: float = 60.0
+    # USD per million tokens, for the cost-per-query numbers only.
+    answer_input_price_per_million: float = 0.75
+    answer_output_price_per_million: float = 4.50
+
+    # Retrieval and the "not found" gate.
+    top_k: int = 5
+    # Below this best rerank score the model is not called. Kept low on purpose: rerank
+    # scores cannot separate near-miss questions (see the Step 10 results), so the gate
+    # only catches clearly off-topic questions and the prompt and validator do the rest.
+    not_found_threshold: float = 0.02
+
     edgar_user_agent: str = ""
 
     @property

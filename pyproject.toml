@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4>=4.15.0",
+    "flashrank>=0.2.10",
     "httpx>=0.28.1",
     "langchain-openai>=1.7.4",
     "langchain-postgres>=0.0.19",
@@ -16,6 +17,7 @@ dependencies = [
     "psycopg[binary]>=3.3.8",
     "pydantic>=2.14.2",
     "pydantic-settings>=2.16.2",
+    "rank-bm25>=0.2.2",
 ]
 
 [tool.ruff]
